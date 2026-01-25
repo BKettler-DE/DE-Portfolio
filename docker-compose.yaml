@@ -1,0 +1,42 @@
+services:
+  # PostgreSQL - for batch pipeline
+  postgres:
+    image: postgres:15
+    container_name: my_postgres
+    environment:
+      POSTGRES_USER: pipeline_user
+      POSTGRES_PASSWORD: pipeline_pass
+      POSTGRES_DB: pipeline_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pipeline_user -d pipeline_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # TimescaleDB - for streaming pipeline
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: my_timescaledb
+    environment:
+      POSTGRES_USER: timeseries_user
+      POSTGRES_PASSWORD: timeseries_pass
+      POSTGRES_DB: timeseries_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      - ./sql/init_timescale.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U timeseries_user -d timeseries_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  timescale_data:
