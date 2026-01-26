@@ -1,6 +1,6 @@
 # Data Engineering Portfolio
 
-Welcome! I'm building this portfolio to document my understanding of engineering concepts through hands-on projects. Each project focuses on understanding fundamental tools and patterns used in production data systems.
+Welcome! I'm building this portfolio to document my understanding of engineering concepts through hands-on projects. Each project focuses on fundamental tools and patterns used in production data systems.
 
 ## 🚀 Projects
 
