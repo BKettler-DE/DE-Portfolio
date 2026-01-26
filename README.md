@@ -1,188 +1,118 @@
 # Data Engineering Portfolio
 
-Welcome! I'm building this portfolio to document my understanding of engineering concepts through hands-on projects. Each project focuses on fundamental tools and patterns used in production data systems.
+Building production-ready data engineering skills through hands-on projects. This portfolio documents my understanding from fundamentals to advanced concepts, with each project demonstrating real-world data engineering patterns.
 
-## 🚀 Projects
+## 🚀 Featured Project
 
-### 1. [Data Pipeline Exploration - Docker & Databases](./docker-databases-demo) ✅ Complete
+### [Data Pipeline Exploration - Docker, Databases & Streaming](./data-pipeline-exploration) ✅ Complete
 
-**Tech Stack:** Docker, PostgreSQL, TimescaleDB, Python
+**A comprehensive exploration of modern data engineering infrastructure**
 
-My first hands-on project exploring how Docker simplifies data infrastructure and how different databases handle different types of workloads.
+**Tech Stack:** Docker, PostgreSQL, TimescaleDB, Apache Kafka, Zookeeper, Python
 
-**What I Built:**
-- Multi-container Docker environment with PostgreSQL and TimescaleDB
-- Interactive Python scripts to explore batch and time-series data
-- Data validation logic with three-zone architecture (Raw → Clean → Quarantine)
-- Comparison of relational vs time-series database patterns
+Built a complete local data engineering environment with three progressive layers:
+- **Layer 1**: Docker containerization for reproducible infrastructure
+- **Layer 2**: Database fundamentals - PostgreSQL + TimescaleDB comparison
+- **Layer 3**: Real-time streaming pipeline with Kafka (fully implemented producer/consumer)
 
-**What I Learned:**
-- Docker basics: containers, volumes, port mapping, docker-compose
-- PostgreSQL fundamentals and SQL analytics queries
-- TimescaleDB for time-series data optimization
-- Data quality patterns and validation strategies
-- Python database connectivity with psycopg2
+**What's Actually Built:**
+- ✅ **Complete streaming pipeline**: IoT sensors → Kafka → Validation → TimescaleDB
+- ✅ **Real-time data quality**: Validation, deduplication, quarantine pattern
+- ✅ **Interactive exploration**: Scripts to query and understand both databases
+- ⚠️ **Batch pipeline**: Sample data and validation concept (automated pipeline not yet built)
 
-**Try It Yourself:**
+**Key Features:**
+- ✅ Three-zone data quality architecture (Raw → Clean → Quarantine)
+- ✅ Real-time streaming pipeline with validation and deduplication
+- ✅ Time-series optimization for IoT sensor data
+- ✅ Interactive exploration scripts for hands-on learning
+- ✅ Handles messy, real-world data (duplicates, missing values, out-of-range)
+- ✅ Producer/consumer decoupling with Kafka message queue
+- ✅ Complete Docker Compose setup (4 services, 1 command to start)
+
+**What Makes This Different:**
+Unlike tutorial projects that gloss over data quality, this demonstrates production patterns:
+- Invalid data isn't dropped - it's quarantined with reasons
+- Deduplication logic prevents processing the same event twice
+- Idempotent design allows safe pipeline re-runs
+- Observable with statistics and validation metrics
+- Raw data preservation enables reprocessing with updated logic
+
+**Metrics:**
+- 3 distinct layers (containerization, databases, streaming)
+- 4 Docker services orchestrated together
+- 7 Python scripts (3 exploratory, 2 pipeline, 2 validation)
+- 2 database schemas with sample data
+- 1000+ lines of working, documented code
+
+[View Project Details →](./data-pipeline-exploration)
+
+**Live Demo Capabilities:**
 ```bash
-git clone https://github.com/BKettler-DE/DE-Portfolio.git
-cd DE-Portfolio/docker-databases-demo
+# Start everything
 docker-compose up -d
-python python_scripts/explore_postgres.py
+
+# Terminal 1: Producer sends 10 readings/second
+python streaming_pipeline/sensor_simulator.py
+
+# Terminal 2: Consumer validates in real-time
+python streaming_pipeline/stream_validator.py
+
+# Terminal 3: Watch data flowing into database
+# Can literally see counts increasing!
 ```
 
-[View Project Details →](./docker-databases-demo)
+## 🛠️ Technical Skills
 
----
+### Languages & Frameworks
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![SQL](https://img.shields.io/badge/SQL-4479A1?style=flat-square&logo=postgresql&logoColor=white)
+![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)
 
-### 2. Upcoming: Batch Pipeline with Airflow ⏳ In Progress
+### Data Engineering Tools
 
-**Planned Tech Stack:** Apache Airflow, Great Expectations, Python
+**Infrastructure:**
+- Docker & Docker Compose (containerization)
+- Apache Kafka (message streaming)
+- Apache Zookeeper (coordination)
 
-Building on the foundation from Project #1, I'll add workflow orchestration and automated data quality checks.
+**Databases:**
+- PostgreSQL (relational, ACID)
+- TimescaleDB (time-series optimization)
+- Understanding of: NoSQL, data warehouses, data lakes
 
-**Learning Goals:**
-- Airflow DAG design and task dependencies
-- Implementing Great Expectations for data validation
-- Error handling and retries
-- Monitoring pipeline health
+**Processing:**
+- Python (pandas, psycopg2, kafka-python)
+- SQL (complex queries, window functions, CTEs)
+- Batch processing patterns
+- Stream processing patterns
 
----
+**Coming Soon:**
+- Apache Airflow (workflow orchestration)
+- Great Expectations (data quality framework)
+- dbt (data transformation)
+- Apache Spark (large-scale processing)
 
-### 3. Upcoming: Streaming Data with Kafka 🔜 Planned
+### Data Engineering Concepts
 
-**Planned Tech Stack:** Apache Kafka, Python Kafka consumers/producers
+**Architecture Patterns:**
+- Batch vs Streaming trade-offs
+- Producer/Consumer decoupling
+- Three-zone data quality (Raw/Clean/Quarantine)
+- Idempotent pipeline design
+- Data lineage and observability
 
-Exploring real-time data streaming patterns with Kafka message queues.
+**Database Design:**
+- Schema design for different workloads
+- Indexing strategies
+- Time-series optimization
+- Partitioning approaches
 
-**Learning Goals:**
-- Kafka producer/consumer patterns
-- Handling late-arriving data
+**Data Quality:**
+- Validation at ingestion
+- Schema enforcement
+- Range checking and anomaly detection
 - Deduplication strategies
-- Real-time validation
-
----
-
-## 🛠️ Skills I'm Building
-
-### Currently Comfortable With:
-- **Docker**: Containers, docker-compose, volumes, networking
-- **Python**: Scripts, data processing, database connectivity
-- **SQL**: SELECT queries, aggregations, JOINs, window functions
-- **PostgreSQL**: Schema design, indexing, basic optimization
-- **Git**: Version control, branching, commits
-
-### Actively Learning:
-- **Apache Airflow**: DAGs, operators, scheduling, monitoring
-- **Kafka**: Message queues, streaming patterns, consumers
-- **Data Quality**: Great Expectations, validation frameworks
-- **Cloud Platforms**: AWS (S3, Redshift, Glue)
-- **dbt**: Data transformations and testing
-
-### On My Roadmap:
-- Apache Spark for large-scale processing
-- Terraform for infrastructure as code
-- Kubernetes for container orchestration
-- Data warehousing (Snowflake, BigQuery)
-- CI/CD for data pipelines
-
-## 📚 Learning Path
-
-### Completed ✅
-- [x] Docker fundamentals and containerization
-- [x] PostgreSQL basics and schema design
-- [x] TimescaleDB for time-series data
-- [x] Python database connectivity
-- [x] Basic data validation patterns
-- [x] SQL analytics queries
-
-### In Progress 🔄
-- [ ] Apache Airflow orchestration
-- [ ] Great Expectations framework
-- [ ] Kafka streaming basics
-- [ ] Error handling and retries
-- [ ] Data quality metrics
-
-### Next Up ⏳
-- [ ] Cloud deployment (AWS/Docker on EC2)
-- [ ] dbt for transformations
-- [ ] Data modeling and dimensional design
-- [ ] CI/CD for pipelines
-
-## 🎯 Learning Approach
-
-**1. Build Small, Working Projects**
-Each project is:
-- Runnable on a laptop (no cloud costs while learning)
-- Well-documented with clear explanations
-- Focused on specific concepts
-- Something I can demo to others
-
-**2. Learn by Doing**
-- Read documentation and tutorials
-- Build hands-on projects
-- Break things and fix them
-- Document what I learned
-
-**3. Focus on Fundamentals**
-Before moving to advanced topics, I'm making sure I understand:
-- Why tools exist (what problem do they solve?)
-- When to use them (batch vs streaming, SQL vs NoSQL)
-- How they work (not just how to use them)
-
-## 🗺️ Portfolio Roadmap
-
-### Phase 1: Foundations (Current) ✅
-**Goal:** Understand core data infrastructure
-- ✅ Docker and containerization
-- ✅ Relational databases (PostgreSQL)
-- ✅ Time-series databases (TimescaleDB)
-- ✅ Basic data validation patterns
-
-### Phase 2: Orchestration (In Progress) 🔄
-**Goal:** Learn workflow management
-- 🔄 Apache Airflow DAGs
-- 🔄 Great Expectations for data quality
-- ⏳ Error handling and monitoring
-- ⏳ Scheduled batch processing
-
-### Phase 3: Streaming (Next Up) ⏳
-**Goal:** Real-time data processing
-- ⏳ Apache Kafka basics
-- ⏳ Stream processing patterns
-- ⏳ Real-time validation
-- ⏳ Handling late data
-
-### Phase 4: Cloud & Scale (Future) 🔜
-**Goal:** Production deployment
-- 🔜 AWS deployment (EC2, S3, Redshift)
-- 🔜 Infrastructure as Code (Terraform)
-- 🔜 Data warehouse design
-
-## 💡 Project Ideas Queue
-
-Projects I want to build as I learn:
-
-1. **Batch ETL with Airflow** (Next up)
-   - Orchestrate the existing pipeline with Airflow
-   - Add Great Expectations validation
-   - Implement retry logic and monitoring
-
-2. **Real-Time Sensor Pipeline** (After Airflow)
-   - Kafka producers generating IoT data
-   - Python consumers validating in real-time
-   - TimescaleDB for storage
-
-3. **Cloud Data Warehouse** (After Kafka)
-   - Deploy to AWS (S3 + Redshift)
-   - dbt for transformations
-   - Dashboard with visualizations
-
-4. **Change Data Capture (CDC)** (Advanced)
-   - Debezium for CDC from PostgreSQL
-   - Kafka for event streaming
-   - Multiple downstream consumers
-
+- Error quarantine (preserve, don't drop)
+  
 *Last Updated: January 2026*
-
-*Project Count: 1 complete, 2 in progress*
