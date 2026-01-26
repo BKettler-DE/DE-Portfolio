@@ -69,8 +69,8 @@ This project demonstrates fundamental data engineering concepts through practica
 
 ```bash
 # 1. Clone this repository
-git clone https://github.com/yourusername/DE-Portfolio/docker-databases-demo.git
-cd docker-databases-demo
+git clone https://github.com/yourusername/DE-Portfolio.git
+cd DE-Portfolio/docker-databases-demo
 
 # 2. Start the databases (this downloads Docker images first time - takes a few minutes)
 docker-compose up -d
