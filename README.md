@@ -73,6 +73,8 @@ Unlike tutorial projects, this demonstrates production-aware thinking:
 
 [View Project Details →](./data-pipeline-exploration)
 
+### [Cloud Data Warehouse Exploration](./cloud-data-warehouse) 🏗️ Currently in development
+
 ## 🛠️ Technical Skills
 
 ### Languages & Frameworks
@@ -164,7 +166,5 @@ Unlike tutorial projects, this demonstrates production-aware thinking:
 - **Both architectures working** - Batch and streaming running simultaneously
 - **Production patterns implemented** - Validation, quarantine, idempotency
 - **Real debugging experience** - Solved 5+ real issues
-
-### [Cloud Data Warehouse Exploration](./cloud-data-warehouse) 🏗️ Currently in development
  
 *Last Updated: January 2026*
