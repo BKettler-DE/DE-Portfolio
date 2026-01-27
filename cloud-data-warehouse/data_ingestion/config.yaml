@@ -1,0 +1,14 @@
+databases:
+  postgres:
+    host: localhost
+    port: 5432              
+    database: pipeline_db   
+    user: pipeline_user     
+    password: pipeline_pass 
+    
+  timescaledb:
+    host: localhost
+    port: 5433              
+    database: timescale_db  
+    user: timescale_user    
+    password: timescale_pass

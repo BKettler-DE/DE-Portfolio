@@ -1,0 +1,15 @@
+# Core dependencies
+pandas>=2.0.0
+pyyaml>=6.0
+
+# Database
+duckdb>=0.9.0
+psycopg2-binary>=2.9.0
+
+# dbt
+dbt-core>=1.7.0
+dbt-duckdb>=1.7.0
+
+# Dashboard
+streamlit>=1.28.0
+plotly>=5.17.0

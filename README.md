@@ -3,7 +3,7 @@
 Demonstrating production-ready data engineering skills through hands-on projects. This portfolio documents my unnderstanding of fundamentals and advanced concepts, with each project demonstrating real-world data engineering patterns.
 
 
-## 🚀 Featured Project
+## 🚀 Featured Projects
 
 ### [Data Pipeline Exploration - Complete Stack](./data-pipeline-exploration) ✅ Complete
 
@@ -165,18 +165,6 @@ Unlike tutorial projects, this demonstrates production-aware thinking:
 - **Production patterns implemented** - Validation, quarantine, idempotency
 - **Real debugging experience** - Solved 5+ real issues
 
-### Next Steps 🔜
-
-**Phase 4: Advanced Quality & Monitoring**
-- ⏳ Integrate Great Expectations framework
-- ⏳ Build data quality dashboard (Streamlit/Grafana)
-- ⏳ Implement email alerts on failures
-- ⏳ Add SLA monitoring
-
-**Phase 5: Cloud Deployment**
-- ⏳ Deploy to AWS (EC2, RDS, MSK, MWAA)
-- ⏳ Infrastructure as code with Terraform
-- ⏳ CI/CD for DAG deployment
-- ⏳ Cost optimization
+### [Cloud Data Warehouse Exploration](./cloud-data-warehouse) 🏗️ Currently in development
  
 *Last Updated: January 2026*
