@@ -1,9 +1,8 @@
--- This runs automatically when TimescaleDB container starts
+-- TimescaleDB initialization script
+-- Creates hypertables for streaming sensor data
 
--- Enable TimescaleDB extension
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
--- Create table for sensor readings
 CREATE TABLE sensor_readings (
     time TIMESTAMPTZ NOT NULL,
     sensor_id VARCHAR(50) NOT NULL,
@@ -13,10 +12,8 @@ CREATE TABLE sensor_readings (
     location VARCHAR(100)
 );
 
--- Convert to hypertable (TimescaleDB magic!)
 SELECT create_hypertable('sensor_readings', 'time');
 
--- Create table for invalid sensor data
 CREATE TABLE sensor_readings_invalid (
     time TIMESTAMPTZ NOT NULL,
     sensor_id VARCHAR(50),
@@ -26,7 +23,7 @@ CREATE TABLE sensor_readings_invalid (
 
 SELECT create_hypertable('sensor_readings_invalid', 'time');
 
--- Insert sample sensor data (last 2 hours)
+-- Insert sample data
 INSERT INTO sensor_readings (time, sensor_id, temperature, humidity, pressure, location)
 SELECT 
     NOW() - (random() * INTERVAL '2 hours'),
@@ -41,7 +38,6 @@ SELECT
     END
 FROM generate_series(1, 1000);
 
--- Create indexes for common queries
 CREATE INDEX idx_sensor_readings_sensor_time ON sensor_readings (sensor_id, time DESC);
 
 COMMENT ON TABLE sensor_readings IS 'Valid time-series sensor data';

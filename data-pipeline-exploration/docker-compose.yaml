@@ -1,5 +1,37 @@
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:2.8.0-python3.11
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://pipeline_user:pipeline_pass@postgres/airflow_db
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    # PostgreSQL connection for pipelines
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: pipeline_db
+    POSTGRES_USER: pipeline_user
+    POSTGRES_PASSWORD: pipeline_pass
+  volumes:
+    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR:-.}/batch_pipeline:/opt/airflow/batch_pipeline
+  user: "${AIRFLOW_UID:-50000}:${GID:-0}"
+  depends_on:
+    &airflow-common-depends-on
+    postgres:
+      condition: service_healthy
+
 services:
-  # PostgreSQL - for batch pipeline
+  # ================================================================
+  # DATABASES
+  # ================================================================
+  
   postgres:
     image: postgres:15
     container_name: my_postgres
@@ -7,18 +39,20 @@ services:
       POSTGRES_USER: pipeline_user
       POSTGRES_PASSWORD: pipeline_pass
       POSTGRES_DB: pipeline_db
+      # Airflow also needs its own database
+      POSTGRES_MULTIPLE_DATABASES: pipeline_db,airflow_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./sql/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/init_postgres.sql:/docker-entrypoint-initdb.d/01-init_postgres.sql
+      - ./sql/init_airflow_db.sql:/docker-entrypoint-initdb.d/02-init_airflow.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pipeline_user -d pipeline_db"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
-  # TimescaleDB - for streaming pipeline
   timescaledb:
     image: timescale/timescaledb:latest-pg15
     container_name: my_timescaledb
@@ -37,19 +71,23 @@ services:
       timeout: 5s
       retries: 5
 
+  # ================================================================
+  # KAFKA STREAMING
+  # ================================================================
+  
   zookeeper:
-      image: confluentinc/cp-zookeeper:7.5.0
-      container_name: my_zookeeper
-      environment:
-        ZOOKEEPER_CLIENT_PORT: 2181
-        ZOOKEEPER_TICK_TIME: 2000
-      ports:
-        - "2181:2181"
-      healthcheck:
-        test: ["CMD", "nc", "-z", "localhost", "2181"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: my_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -74,6 +112,67 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+
+  # ================================================================
+  # AIRFLOW
+  # ================================================================
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        if [ ! -d "/opt/airflow/logs" ]; then
+          mkdir -p /opt/airflow/logs /opt/airflow/dags /opt/airflow/plugins
+        fi
+        airflow db migrate
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com || true
+        echo "Init completed successfully"
+    environment:
+      <<: *airflow-common-env
+    restart: "no"
 
 volumes:
   postgres_data:
