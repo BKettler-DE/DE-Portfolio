@@ -1,14 +1,30 @@
 databases:
   postgres:
     host: localhost
-    port: 5432              
-    database: pipeline_db   
-    user: pipeline_user     
-    password: pipeline_pass 
+    port: 5432
+    database: pipeline_db
+    user: pipeline_user
+    password: pipeline_pass
     
   timescaledb:
     host: localhost
-    port: 5433              
-    database: timescale_db  
-    user: timescale_user    
-    password: timescale_pass
+    port: 5433
+    database: timeseries_db
+    user: timeseries_user
+    password: timeseries_pass
+
+data_lake:
+  base_path: ../data_lake
+  
+export_settings:
+  # How many days of streaming data to export
+  streaming_lookback_days: 7
+  
+  # Whether to export quarantined/error data
+  include_quarantine: true
+  
+  # File format (parquet is industry standard for data lakes)
+  file_format: parquet
+  
+  # Compression (snappy is fast and efficient)
+  compression: snappy
