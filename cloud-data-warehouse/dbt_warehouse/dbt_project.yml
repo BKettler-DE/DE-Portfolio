@@ -1,0 +1,147 @@
+# dbt Project Configuration
+# This is the main config file for your dbt transformation project
+
+# WHAT IS THIS FILE?
+# Think of this as dbt's "settings.json" - it controls how dbt builds your warehouse
+
+name: 'data_warehouse'
+version: '1.0.0'
+config-version: 2
+
+# PROFILE CONFIGURATION
+# This tells dbt which connection profile to use (defined in profiles.yml)
+# Profile contains: database type, credentials, connection details
+profile: 'data_warehouse'
+
+# DIRECTORY PATHS
+# Tell dbt where to find different types of files
+model-paths: ["models"]        # SQL transformation files live here
+analysis-paths: ["analyses"]   # Ad-hoc analysis queries (not built into warehouse)
+test-paths: ["tests"]          # Custom data quality tests
+seed-paths: ["seeds"]          # Static CSV files to load (like lookup tables)
+macro-paths: ["macros"]        # Reusable SQL functions
+snapshot-paths: ["snapshots"]  # Slowly changing dimension tracking
+
+# CLEANING
+# What to delete when you run `dbt clean`
+clean-targets:
+  - "target"        # Compiled SQL and run artifacts
+  - "dbt_packages" # Downloaded packages (can be re-downloaded)
+
+# MODEL CONFIGURATION
+# This is WHERE THE MAGIC HAPPENS!
+# Define how different layers of models should be built
+models:
+  data_warehouse:  # Must match the 'name' above
+    
+    # STAGING LAYER
+    # Purpose: Standardize raw data (rename columns, cast types)
+    # Why views? Fast to rebuild, we'll transform them in next layer
+    staging:
+      +materialized: view      # Build as views (not physical tables)
+      +schema: staging         # Put in 'staging' schema
+      
+    # INTERMEDIATE LAYER  
+    # Purpose: Apply business logic, calculations, joins
+    # Why views? Still just transforming, not final output
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+      
+    # MARTS LAYER
+    # Purpose: Final analytics-ready tables for end users
+    # Why tables? These are queried frequently, need to be fast
+    marts:
+      +materialized: table     # Build as physical tables
+      +schema: marts
+      
+      # Sub-folders within marts can have their own configs
+      analytics:
+        +materialized: table   # Core fact/dimension tables
+        
+      reports:
+        +materialized: table   # Pre-aggregated reports
+
+# DOCUMENTATION
+# Where to find custom docs (markdown files explaining your models)
+docs-paths: ["docs"]
+
+# TESTING
+# How dbt should handle test failures
+tests:
+  +severity: warn  # Don't fail builds on test failures, just warn
+  # In production, you might set this to 'error' to fail builds
+
+# SEEDS
+# Configuration for CSV files loaded as reference tables
+seeds:
+  +schema: seeds
+
+# VARIABLES
+# Values you can reference in your models with {{ var('variable_name') }}
+# Can be overridden at runtime: dbt run --vars '{"lookback_days": 60}'
+vars:
+  # Date range for incremental models
+  lookback_days: 30
+  
+  # Data quality thresholds (used in tests)
+  quality_threshold: 0.95  # 95% pass rate
+
+
+# =============================================================================
+# UNDERSTANDING THE SCHEMA NAMING
+# =============================================================================
+# 
+# With this config, dbt will create schemas like:
+# 
+# In DuckDB:
+# ├── staging (from +schema: staging)
+# │   ├── stg_products
+# │   └── stg_sensor_readings
+# ├── intermediate (from +schema: intermediate)
+# │   └── int_sensor_hourly_stats
+# └── marts (from +schema: marts)
+#     ├── fct_sensor_readings
+#     ├── dim_sensors
+#     └── rpt_data_quality_dashboard
+#
+# Why separate schemas?
+# - Organization (easy to find things)
+# - Permissions (can grant access per schema)
+# - Clarity (know what layer you're in)
+#
+# =============================================================================
+# UNDERSTANDING MATERIALIZATION
+# =============================================================================
+#
+# VIEW (staging, intermediate):
+# - Fast to build (just saves SQL, doesn't run it)
+# - Slow to query (runs SQL every time)
+# - Good for: Transformations that change frequently
+#
+# TABLE (marts):
+# - Slow to build (runs SQL and stores results)
+# - Fast to query (just reads stored data)
+# - Good for: Final outputs queried by dashboards/users
+#
+# Example:
+# If you run `dbt run`:
+# 1. dbt creates views for staging models
+# 2. dbt creates views for intermediate models  
+# 3. dbt creates tables for marts models
+#
+# =============================================================================
+# WHY THIS STRUCTURE?
+# =============================================================================
+#
+# This is the "Kimball" approach used by most modern data teams:
+#
+# Raw Data → Staging (standardize) → Intermediate (transform) → Marts (serve)
+#
+# Benefits:
+# - Modular (each layer has one job)
+# - Testable (can test each layer independently)
+# - Reusable (intermediate models can feed multiple marts)
+# - Debuggable (easy to find where things break)
+#
+# =============================================================================

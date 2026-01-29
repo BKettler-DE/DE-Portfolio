@@ -1,0 +1,175 @@
+# dbt Profile Configuration
+# This file tells dbt HOW to connect to your warehouse
+
+# WHAT IS THIS FILE?
+# Think of it as your database connection string - credentials and settings
+
+# WHY SEPARATE FROM dbt_project.yml?
+# - Security: Can gitignore this file to keep credentials private
+# - Flexibility: Can have different profiles for dev/prod
+# - Portability: Same project code, different connections per environment
+
+# PROFILE NAME must match the 'profile' setting in dbt_project.yml
+data_warehouse:
+  
+  # TARGET: Which environment to use by default
+  # When you run `dbt run`, it uses this target
+  # You can override with: dbt run --target prod
+  target: dev
+  
+  # OUTPUTS: Different connection configurations
+  outputs:
+    
+    # DEVELOPMENT ENVIRONMENT
+    # This is what you'll use for building/testing locally
+    dev:
+      type: duckdb              # Database adapter to use
+      path: '../warehouse.duckdb'  # Where to create the DuckDB file
+      
+      # PERFORMANCE SETTINGS
+      threads: 4                # How many models to build in parallel
+      # More threads = faster, but uses more CPU
+      # 4 is good for local development
+      
+      # DUCKDB EXTENSIONS
+      # These add extra functionality to DuckDB
+      extensions:
+        - parquet               # READ parquet files from data lake
+        - httpfs                # READ files from URLs (useful for S3 later)
+      
+      # DUCKDB SETTINGS
+      # Performance tuning for DuckDB
+      settings:
+        memory_limit: '4GB'     # Max memory DuckDB can use
+        threads: 4              # CPU threads for queries
+    
+    # PRODUCTION ENVIRONMENT (for future use)
+    # When you deploy to cloud, you'd use this
+    prod:
+      type: duckdb
+      path: '../warehouse_prod.duckdb'
+      threads: 8                # More threads for production
+      extensions:
+        - parquet
+        - httpfs
+      settings:
+        memory_limit: '8GB'     # More memory in production
+        threads: 8
+
+
+# =============================================================================
+# UNDERSTANDING THE PATH
+# =============================================================================
+#
+# path: '../warehouse.duckdb'
+#
+# This is RELATIVE to where dbt runs from (the dbt_warehouse/ folder)
+#
+# File structure:
+# cloud-data-warehouse/
+# ├── dbt_warehouse/          ← dbt runs from here
+# │   ├── dbt_project.yml
+# │   └── profiles.yml        ← You are here
+# └── warehouse.duckdb        ← Database created here (../ = parent folder)
+#
+# Why ../warehouse.duckdb?
+# - .. = go up one directory (to cloud-data-warehouse/)
+# - warehouse.duckdb = database file name
+#
+# =============================================================================
+# UNDERSTANDING THREADS
+# =============================================================================
+#
+# threads: 4
+#
+# When you run `dbt run`, it builds models in parallel:
+#
+# Without parallelization:
+# Model 1 → Model 2 → Model 3 → Model 4  (slow, sequential)
+#
+# With threads: 4:
+# Model 1 ┐
+# Model 2 ├─ All run at once (fast!)
+# Model 3 │
+# Model 4 ┘
+#
+# dbt is smart - it only parallelizes models that DON'T depend on each other
+# Models that depend on each other still run in order
+#
+# =============================================================================
+# UNDERSTANDING EXTENSIONS
+# =============================================================================
+#
+# extensions:
+#   - parquet
+#   - httpfs
+#
+# These are DuckDB plugins that add functionality:
+#
+# parquet extension:
+# - Lets DuckDB read .parquet files
+# - Essential for our data lake pattern
+# - Without this: "Error: unknown file type .parquet"
+#
+# httpfs extension:
+# - Lets DuckDB read from HTTP/HTTPS URLs
+# - Useful for: Reading directly from S3 in production
+# - Example: SELECT * FROM 's3://bucket/file.parquet'
+#
+# =============================================================================
+# WHY DUCKDB?
+# =============================================================================
+#
+# You might wonder: "Why not PostgreSQL/MySQL/etc?"
+#
+# DuckDB advantages for this project:
+# ✅ FREE - No server needed, no cloud costs
+# ✅ FAST - Optimized for analytics (faster than Postgres for aggregations)
+# ✅ PORTABLE - Single file, easy to share/backup
+# ✅ PARQUET NATIVE - Reads parquet files directly (perfect for data lakes)
+# ✅ SQL COMPATIBLE - Works like PostgreSQL/Snowflake
+#
+# Migration path:
+# - Start: DuckDB (local, free)
+# - Scale: Snowflake/Redshift (cloud, paid)
+# - Code changes: Minimal! Just swap this profiles.yml file
+#
+# =============================================================================
+# COMMON ISSUES
+# =============================================================================
+#
+# ❌ "Could not find profile"
+# → Make sure 'data_warehouse' matches profile name in dbt_project.yml
+#
+# ❌ "Could not load extensions"
+# → Run: dbt deps (installs dbt packages and extensions)
+#
+# ❌ "Database is locked"
+# → Close any other programs using warehouse.duckdb
+# → On Windows: Check if Python is still running in background
+#
+# ❌ "Out of memory"
+# → Reduce memory_limit (try '2GB' if on older laptop)
+# → Reduce threads (try threads: 2)
+#
+# =============================================================================
+# PRODUCTION DEPLOYMENT
+# =============================================================================
+#
+# When you're ready to deploy to cloud, you'd create a new target:
+#
+# prod:
+#   type: snowflake  # or redshift, bigquery, etc.
+#   account: your-account
+#   user: your-user
+#   password: "{{ env_var('DBT_PASSWORD') }}"  # from environment variable
+#   database: production
+#   warehouse: compute_wh
+#   schema: analytics
+#   threads: 8
+#
+# Then run: dbt run --target prod
+#
+# Your SQL stays the same! Only connection changes.
+#
+# =============================================================================
