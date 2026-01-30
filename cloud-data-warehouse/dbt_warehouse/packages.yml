@@ -1,0 +1,114 @@
+# dbt Packages Configuration
+# External packages to install in this project
+
+# WHAT ARE DBT PACKAGES?
+# Pre-built collections of macros, models, and tests from the dbt community
+# Think of them like npm packages or pip packages, but for SQL/dbt
+
+# WHY USE PACKAGES?
+# - Don't reinvent the wheel
+# - Battle-tested code from the community
+# - Adds functionality dbt doesn't have built-in
+
+packages:
+  
+  # DBT_UTILS - The essential utilities package
+  # Almost every dbt project uses this!
+  - package: dbt-labs/dbt_utils
+    version: 1.1.1
+    
+  # WHAT'S IN DBT_UTILS?
+  # - generate_surrogate_key() - Create unique IDs for dimension tables
+  # - union_relations() - Combine multiple tables
+  # - get_column_values() - Extract unique values from a column
+  # - date_spine() - Generate date dimension tables
+  # - recency tests - Check data freshness
+  # - And 50+ other useful macros!
+    
+  # FUTURE PACKAGES (commented out for now):
+  
+  # - package: dbt-labs/codegen
+  #   version: 0.12.1
+  #   # Generates boilerplate dbt code
+  #   # Example: Auto-generate staging models from sources
+  
+  # - package: calogica/dbt_expectations
+  #   version: 0.10.0
+  #   # Great Expectations-style data quality tests
+  #   # Example: expect_column_values_to_be_between(min=0, max=100)
+
+
+# =============================================================================
+# HOW TO USE THESE PACKAGES
+# =============================================================================
+#
+# After creating this file, run:
+#   dbt deps
+#
+# This will:
+# 1. Download packages from GitHub
+# 2. Install them in dbt_packages/ folder
+# 3. Make macros available in your models
+#
+# Example usage in a model:
+#
+# SELECT 
+#     {{ dbt_utils.generate_surrogate_key(['product_id', 'source']) }} as product_key,
+#     product_id,
+#     name
+# FROM staging.stg_products
+#
+# =============================================================================
+# VERSION PINNING
+# =============================================================================
+#
+# We specify exact versions (1.1.1) instead of ranges:
+#
+# ✅ Good (what we do):
+# - version: 1.1.1
+#
+# ❌ Avoid:
+# - version: [">=1.0.0", "<2.0.0"]
+#
+# Why?
+# - Reproducibility: Same code works 6 months from now
+# - No surprises: Breaking changes don't suddenly appear
+# - Debugging: Know exactly what version you're using
+#
+# =============================================================================
+# PACKAGE STRUCTURE AFTER INSTALLATION
+# =============================================================================
+#
+# After running `dbt deps`, you'll have:
+#
+# dbt_warehouse/
+# ├── dbt_packages/           ← New folder!
+# │   └── dbt_utils/
+# │       ├── macros/         ← SQL functions you can use
+# │       ├── models/         ← Utility models
+# │       └── ...
+# ├── models/
+# ├── dbt_project.yml
+# └── packages.yml            ← This file
+#
+# =============================================================================
+# COMMON PACKAGES (Reference)
+# =============================================================================
+#
+# dbt_utils (https://hub.getdbt.com/dbt-labs/dbt_utils/)
+# - The standard library of dbt
+# - 99% of projects use this
+#
+# dbt_expectations (https://hub.getdbt.com/calogica/dbt_expectations/)
+# - Advanced data quality tests
+# - Great for data validation
+#
+# codegen (https://hub.getdbt.com/dbt-labs/codegen/)
+# - Generates boilerplate code
+# - Saves time on repetitive tasks
+#
+# audit_helper (https://hub.getdbt.com/dbt-labs/audit_helper/)
+# - Compare data between tables
+# - Useful for validating migrations
+#
+# =============================================================================

@@ -1,0 +1,234 @@
+# dbt Sources Configuration
+# Defines where raw data lives (our data lake parquet files)
+
+# WHAT ARE SOURCES?
+# External data that dbt READS but doesn't CREATE
+# In our case: parquet files exported from the pipeline project
+
+# WHY DEFINE SOURCES?
+# - dbt knows where to find raw data
+# - Track data lineage (where data comes from)
+# - Test freshness (is data up to date?)
+# - Document what columns exist
+
+version: 2
+
+sources:
+  
+  # SOURCE 1: BATCH PIPELINE DATA (PostgreSQL)
+  # Data from your Airflow batch pipeline
+  - name: raw_batch
+    description: "Batch pipeline data exported from PostgreSQL"
+    
+    # For external files (parquet), we don't need database/schema
+    # DuckDB reads directly from the file path
+    
+    # TABLES IN THIS SOURCE
+    tables:
+      
+      # TABLE 1: Clean products
+      - name: clean_products
+        description: "Validated product data from batch pipeline"
+        
+        # EXTERNAL LOCATION
+        # This tells DuckDB where the parquet file is
+        # The * means "all files matching this pattern"
+        # So clean_products_20260128.parquet, clean_products_20260129.parquet, etc.
+        external_location: "../data_lake/raw/batch/clean_products_*.parquet"
+        
+        # Note: Freshness checks don't work well with external parquet files
+        # In production, you'd load parquet into tables first, then check freshness
+        
+        # COLUMNS
+        # Document what's in this table
+        columns:
+          - name: product_id
+            description: "Unique product identifier"
+            tests:
+              - not_null    # This column should never be null
+              - unique      # This column should have no duplicates
+          
+          - name: name
+            description: "Product name"
+            tests:
+              - not_null
+          
+          - name: price
+            description: "Product price in USD"
+            tests:
+              - not_null
+          
+          - name: stock
+            description: "Available stock quantity"
+          
+          - name: source
+            description: "Source system that provided this product"
+          
+          - name: category
+            description: "Product category"
+          
+          - name: loaded_at
+            description: "When product was loaded into database"
+      
+      # TABLE 2: Quarantined products
+      - name: quarantine_products
+        description: "Products that failed validation - for quality analysis"
+        external_location: "../data_lake/raw/batch/quarantine_products_*.parquet"
+        
+        columns:
+          - name: id
+            description: "Quarantine record identifier"
+          
+          - name: raw_data
+            description: "Original data as JSON string (JSONB cast to text)"
+          
+          - name: issues
+            description: "What validation errors occurred"
+          
+          - name: quarantined_at
+            description: "When record was quarantined"
+
+  # SOURCE 2: STREAMING PIPELINE DATA (TimescaleDB)
+  # Data from your Kafka streaming pipeline
+  - name: raw_streaming
+    description: "Streaming pipeline data exported from TimescaleDB"
+    
+    # For external files (parquet), we don't need database/schema
+    # DuckDB reads directly from the file path
+    
+    tables:
+      
+      # TABLE 1: Valid sensor readings
+      - name: sensor_readings
+        description: "Time-series IoT sensor data from streaming pipeline"
+        external_location: "../data_lake/raw/streaming/sensor_readings_*.parquet"
+        
+        # Note: Freshness checks don't work well with external parquet files
+        # In production, you'd load parquet into tables first, then check freshness
+        
+        columns:
+          - name: time
+            description: "Reading timestamp"
+            tests:
+              - not_null
+          
+          - name: sensor_id
+            description: "Sensor identifier"
+            tests:
+              - not_null
+          
+          - name: temperature
+            description: "Temperature reading in Celsius"
+          
+          - name: humidity
+            description: "Humidity percentage"
+          
+          - name: pressure
+            description: "Atmospheric pressure"
+          
+          - name: location
+            description: "Physical location of the sensor"
+      
+      # TABLE 2: Invalid sensor readings
+      - name: sensor_readings_invalid
+        description: "Sensor readings that failed validation"
+        external_location: "../data_lake/raw/streaming/sensor_readings_invalid_*.parquet"
+        
+        columns:
+          - name: time
+            description: "When invalid reading occurred"
+          
+          - name: sensor_id
+            description: "Sensor that generated invalid reading"
+          
+          - name: raw_data
+            description: "Original data as JSON string"
+          
+          - name: issues
+            description: "Validation errors"
+
+
+# =============================================================================
+# HOW TO USE SOURCES IN MODELS
+# =============================================================================
+#
+# In your staging models, reference sources like this:
+#
+# SELECT * FROM {{ source('raw_batch', 'clean_products') }}
+#
+# This is better than:
+# SELECT * FROM '../data_lake/raw/batch/clean_products_*.parquet'
+#
+# Why?
+# - dbt tracks lineage (knows where data comes from)
+# - Can test freshness
+# - Can run source-only tests
+# - Easier to change location later
+#
+# =============================================================================
+# UNDERSTANDING EXTERNAL_LOCATION
+# =============================================================================
+#
+# external_location: "../data_lake/raw/batch/clean_products_*.parquet"
+#
+# Path is relative to where dbt runs (dbt_warehouse/)
+#
+# ../ = go up to cloud-data-warehouse/
+# data_lake/raw/batch/ = navigate to batch folder
+# clean_products_*.parquet = read ALL matching files
+#
+# The * wildcard means:
+# - clean_products_20260128.parquet ✅
+# - clean_products_20260129.parquet ✅
+# - clean_products_20260130.parquet ✅
+# - sensor_readings_20260128.parquet ❌ (different name)
+#
+# DuckDB will UNION all matching files automatically!
+#
+# =============================================================================
+# FRESHNESS CHECKS
+# =============================================================================
+#
+# freshness:
+#   warn_after: {count: 24, period: hour}
+#   error_after: {count: 48, period: hour}
+#
+# Run with: dbt source freshness
+#
+# dbt checks the loaded_at (batch) or time (streaming) column
+# If data is older than threshold, it warns/errors
+#
+# Example:
+# - Last data: Jan 27, 10am
+# - Current time: Jan 28, 11am
+# - Age: 25 hours
+# - Result: WARNING (>24h but <48h)
+#
+# =============================================================================
+# TESTING SOURCES
+# =============================================================================
+#
+# The tests under columns run when you execute:
+# dbt test --select source:raw_batch
+#
+# tests:
+#   - not_null    → Column has no NULL values
+#   - unique      → Column has no duplicates
+#
+# This catches data quality issues BEFORE transformation!
+#
+# =============================================================================
+# WHY DOCUMENT COLUMNS?
+# =============================================================================
+#
+# Good documentation helps:
+# - Future you (6 months from now)
+# - Teammates
+# - Stakeholders
+# - dbt docs website (auto-generated documentation)
+#
+# Run: dbt docs generate
+# Then: dbt docs serve
+# Opens beautiful documentation in browser!
+#
+# =============================================================================
