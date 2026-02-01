@@ -73,7 +73,95 @@ Unlike tutorial projects, this demonstrates production-aware thinking:
 
 [View Project Details →](./data-pipeline-exploration)
 
-### [Cloud Data Warehouse Exploration](./cloud-data-warehouse) 🏗️ Currently in development
+### [Cloud Data Warehouse & Analytics](./cloud-data-warehouse) ✅ Complete
+
+**Modern analytics platform demonstrating transformation and dimensional modeling**
+
+**Tech Stack:** DuckDB, dbt Core, Streamlit, Plotly, Python, Parquet
+
+Built the analytics consumption layer that transforms raw data into business insights:
+- **Data Lake Pattern**: Parquet files simulating S3 intermediate storage
+- **dbt Transformations**: SQL-based modeling with testing and documentation
+- **Dimensional Warehouse**: Star schema with fact and dimension tables
+- **Interactive Dashboard**: Self-service analytics with Streamlit
+
+**What's Actually Built:**
+
+✅ **Data Export Bridge**
+- Python script connecting pipeline project to warehouse
+- Exports to parquet files (data lake pattern)
+- Handles 1,650+ rows across 4 source tables
+- Daily export workflow ready for scheduling
+
+✅ **dbt Transformation Pipeline**
+- 2 staging models (views for standardization)
+- 2 marts models (tables for analytics)
+- Surrogate key generation with dbt_utils
+- Comprehensive data quality tests
+- Auto-generated documentation with lineage graph
+
+✅ **DuckDB Analytical Warehouse**
+- Embedded warehouse (production-grade, used by Figma/Notion)
+- Star schema: 1 dimension + 1 fact table
+- Business categorizations (price tiers, temperature ranges)
+- Anomaly detection and data quality flags
+- Fast queries on pre-computed tables
+
+✅ **Streamlit Analytics Dashboard**
+- 4 interactive pages (Overview, Sensors, Products, Quality)
+- Real-time metrics and visualizations
+- Plotly charts (time-series, distributions, pie charts)
+- Drill-down filtering by sensor
+- Data quality monitoring
+
+**Key Features:**
+- ✅ **Complete data stack** - Lake → Transform → Warehouse → Dashboard
+- ✅ **Modern data stack** - dbt-centric transformation workflow
+- ✅ **Dimensional modeling** - Kimball star schema methodology
+- ✅ **Production patterns** - Staging/marts layers, surrogate keys, testing
+- ✅ **End-to-end data flow** - Ingestion → Transformation → Visualization
+- ✅ **Self-service analytics** - Business users can explore without SQL
+
+**What Makes This Different:**
+
+Demonstrates the consumption side of data engineering:
+- **Builds on pipeline project** - Shows complete data lifecycle
+- **Modern tooling** - dbt is industry standard for transformation
+- **Analytics engineering** - SQL-first, version-controlled transformations
+- **Dimensional design** - Proper fact/dimension separation
+- **Data quality focus** - Testing at every layer
+- **Business value** - Dashboard shows actual insights
+- **Cloud-ready** - DuckDB → Snowflake migration is trivial
+
+**Metrics:**
+- 2-layer transformation architecture (Staging → Marts)
+- 4 dbt models (2 views + 2 tables)
+- 1 DuckDB warehouse (~1,650 rows across 2 schemas)
+- 1 interactive dashboard (4 pages, 10+ visualizations)
+- 6 data quality tests
+- Full lineage documentation
+- 600+ lines of SQL and Python
+
+**Integration with Pipeline Project:**
+```
+Pipeline Project (Ingestion)
+    ↓
+Data Lake (Parquet Files)
+    ↓
+dbt Transformations
+    ↓
+DuckDB Warehouse
+    ↓
+Streamlit Dashboard
+```
+
+**Together, the projects demonstrate:**
+- Raw data → Ingestion (Kafka/Airflow) → Storage (PostgreSQL/TimescaleDB)
+- Export → Data Lake (Parquet) → Transform (dbt) → Warehouse (DuckDB)
+- Analytics → Visualization (Streamlit) → Insights
+
+[View Project Details →](./cloud-data-warehouse)
+
 
 ## 🛠️ Technical Skills
 
