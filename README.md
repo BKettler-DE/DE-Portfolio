@@ -161,5 +161,7 @@ Streamlit Dashboard
 - Analytics → Visualization (Streamlit) → Insights
 
 [View Project Details →](./cloud-data-warehouse)
+
+### ML Feature Stores 🚧 Coming Soon
  
 *Last Updated: January 2026*
