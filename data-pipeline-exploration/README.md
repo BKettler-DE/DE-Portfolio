@@ -1,5 +1,7 @@
 # Data Pipeline Exploration - Complete Data Engineering Stack
 
+‼️‼️‼️ Some architecture information currently incorrect as I build out the ML feature project, but remains fully functional ‼️‼️‼️
+
 A comprehensive hands-on learning project demonstrating modern data engineering infrastructure through practical, runnable examples. This project showcases containerization, database design, real-time streaming, batch orchestration, and data quality validation patterns.
 
 ## 🎯 Project Overview
