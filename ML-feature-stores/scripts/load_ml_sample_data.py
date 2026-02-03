@@ -250,7 +250,6 @@ def load_sensor_events():
                         INSERT INTO sensor_events (
                             event_id, sensor_id, timestamp, temperature
                         ) VALUES (%s, %s, %s, %s)
-                        ON CONFLICT (event_id) DO NOTHING
                     """, batch)
                     total_events += len(batch)
                     batch = []
@@ -262,7 +261,6 @@ def load_sensor_events():
                 INSERT INTO sensor_events (
                     event_id, sensor_id, timestamp, temperature
                 ) VALUES (%s, %s, %s, %s)
-                ON CONFLICT (event_id) DO NOTHING
             """, batch)
             total_events += len(batch)
         
@@ -358,14 +356,6 @@ def verify_data():
     print("  • Failure history (ML training labels)")
     print("  • Historical sensor events in TimescaleDB")
     print("\n" + "="*70)
-    print("NEXT STEPS:")
-    print("="*70)
-    print("  1. ✅ Infrastructure setup - DONE")
-    print("  2. ✅ Data loading - DONE")
-    print("  3. 🎯 NEXT: Create batch features with dbt")
-    print("     - We'll create SQL models to compute equipment features")
-    print("     - Features like: equipment age, days since maintenance, etc.")
-    print("="*70 + "\n")
 
 
 if __name__ == '__main__':
