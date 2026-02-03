@@ -1,2 +1,2 @@
-# ML Feature Stores Project
-🚧 currently under development 🚧
+# ML Feature Stores
+🚧 Currently under development 🚧
