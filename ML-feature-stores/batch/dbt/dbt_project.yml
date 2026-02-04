@@ -1,0 +1,34 @@
+name: 'ml_features'
+version: '1.0.0'
+config-version: 2
+
+profile: 'ml_features'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  ml_features:
+    # Config for all models
+    +materialized: table
+    
+    # Staging models (views for standardization)
+    staging:
+      +materialized: view
+      
+    # Feature models (tables for serving)
+    features:
+      +materialized: table
+      +tags: ['batch_features']
+
+vars:
+  # Feature engineering parameters
+  lookback_days_maintenance: 30
+  lookback_days_failures: 90

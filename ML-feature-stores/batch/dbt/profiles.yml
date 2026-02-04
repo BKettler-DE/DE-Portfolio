@@ -1,0 +1,13 @@
+ml_features:
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      port: 5432
+      user: pipeline_user
+      password: pipeline_pass
+      dbname: pipeline_db
+      schema: features
+      threads: 4
+      
+  target: dev

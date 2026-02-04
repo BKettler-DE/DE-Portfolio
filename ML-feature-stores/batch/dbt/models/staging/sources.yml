@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: ml_source
+    database: pipeline_db
+    schema: public
+    tables:
+      - name: equipment
+        description: "Equipment inventory"
+        
+      - name: sensors
+        description: "Sensor to equipment mapping"
+        
+      - name: maintenance_history
+        description: "Equipment maintenance events"
+        
+      - name: failure_history
+        description: "Equipment failure events (ML labels)"
