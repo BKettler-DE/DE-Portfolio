@@ -1,0 +1,121 @@
+version: 2
+
+models:
+  - name: batch_equipment_features
+    description: "ML-ready batch features for equipment failure prediction"
+    columns:
+      - name: equipment_id
+        description: "Unique equipment identifier"
+        tests:
+          - not_null
+          - unique
+      
+      - name: equipment_type
+        description: "Type of equipment"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Centrifugal Pump', 'Air Compressor', 'Electric Motor', 'HVAC System']
+              config:
+                severity: error
+      
+      - name: equipment_age_days
+        description: "Days since equipment installation"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      
+      - name: days_since_maintenance
+        description: "Days since last maintenance"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      
+      - name: maintenance_count_30d
+        description: "Number of maintenance events in last 30 days"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      
+      - name: failure_count_90d
+        description: "Number of failures in last 90 days"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      
+      - name: avg_downtime_hours_90d
+        description: "Average downtime per failure in last 90 days"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      
+      - name: equipment_type_risk_score
+        description: "Type-level failure rate"
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+      
+      - name: risk_tier
+        description: "Categorical risk classification"
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low_risk', 'medium_risk', 'high_risk', 'aging_risk']
+              config:
+                severity: error
+      
+      - name: feature_date
+        description: "Date features were computed"
+        tests:
+          - not_null
+      
+      - name: feature_timestamp
+        description: "Timestamp features were computed"
+        tests:
+          - not_null
+
+  - name: stg_equipment
+    description: "Standardized equipment data"
+    columns:
+      - name: equipment_id
+        tests:
+          - not_null
+          - unique
+      
+      - name: age_category
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['new', 'established', 'aging']
+              config:
+                severity: error
+
+  - name: stg_maintenance_events
+    description: "Unified maintenance and failure event timeline"
+    columns:
+      - name: equipment_id
+        tests:
+          - not_null
+      
+      - name: event_type
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['maintenance', 'failure']
+              config:
+                severity: error
